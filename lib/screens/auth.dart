@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:chat/widgets/user_image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class _AuthScreenState extends State<AuthScreen> {
   var _emailAddress = '';
   var _password = '';
   File? selectedImage;
+  var isAuthenticating = false;
   void _saveForm() async {
     var isValid = _form.currentState!.validate();
     if (!isValid || (selectedImage == null && !_isLogin)) {
@@ -29,6 +31,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
     _form.currentState!.save();
     try {
+      setState(() {
+        isAuthenticating = true;
+      });
       if (_isLogin) {
         final userCredentials = await _firebase.signInWithEmailAndPassword(
             email: _emailAddress, password: _password);
@@ -44,6 +49,14 @@ class _AuthScreenState extends State<AuthScreen> {
         await storageRef.putFile(selectedImage!);
         final imageUrl = await storageRef.getDownloadURL();
         print(imageUrl);
+        await FirebaseFirestore.instance
+            .collection('user-data')
+            .doc(userCredentials.user!.uid)
+            .set({
+          'username': '...',
+          'image-url': imageUrl,
+          'email': _emailAddress,
+        });
       }
     } on FirebaseAuthException catch (error) {
       if (error.code == 'email-already-in-use') {
@@ -55,6 +68,9 @@ class _AuthScreenState extends State<AuthScreen> {
           content: Text(error.message ?? 'Authentication failed'),
         ),
       );
+      setState(() {
+        isAuthenticating = false;
+      });
     }
   }
 
@@ -131,24 +147,28 @@ class _AuthScreenState extends State<AuthScreen> {
                           const SizedBox(
                             height: 10,
                           ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
+                          if (isAuthenticating)
+                            const CircularProgressIndicator(),
+                          if (!isAuthenticating)
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer,
+                              ),
+                              onPressed: _saveForm,
+                              child: Text(_isLogin ? 'Login' : 'SignUp'),
                             ),
-                            onPressed: _saveForm,
-                            child: Text(_isLogin ? 'Login' : 'SignUp'),
-                          ),
-                          TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _isLogin = !_isLogin;
-                                });
-                              },
-                              child: Text(_isLogin
-                                  ? 'Create new account'
-                                  : 'Already have an account'))
+                          if (!isAuthenticating)
+                            TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _isLogin = !_isLogin;
+                                  });
+                                },
+                                child: Text(_isLogin
+                                    ? 'Create new account'
+                                    : 'Already have an account'))
                         ],
                       ),
                     ),
