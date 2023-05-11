@@ -21,6 +21,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _form = GlobalKey<FormState>();
   var _emailAddress = '';
   var _password = '';
+  var _username = '';
   File? selectedImage;
   var isAuthenticating = false;
   void _saveForm() async {
@@ -53,7 +54,7 @@ class _AuthScreenState extends State<AuthScreen> {
             .collection('user-data')
             .doc(userCredentials.user!.uid)
             .set({
-          'username': '...',
+          'username': _username,
           'image-url': imageUrl,
           'email': _emailAddress,
         });
@@ -129,6 +130,21 @@ class _AuthScreenState extends State<AuthScreen> {
                               _emailAddress = newValue!;
                             },
                           ),
+                          if (!_isLogin)
+                            TextFormField(
+                              enableSuggestions: false,
+                              decoration:
+                                  const InputDecoration(labelText: 'Username'),
+                              onSaved: (newValue) {
+                                _username = newValue!;
+                              },
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Enter valid username';
+                                }
+                                return null;
+                              },
+                            ),
                           TextFormField(
                             decoration: const InputDecoration(
                               label: Text('Password'),
