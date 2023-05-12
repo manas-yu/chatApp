@@ -1,6 +1,8 @@
 import 'package:chat/widgets/chat_messages.dart';
 import 'package:chat/widgets/new_messages.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -28,8 +30,32 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Future<String> getUrl() async {
+      final userId = FirebaseAuth.instance.currentUser!.uid;
+      final data = await FirebaseFirestore.instance
+          .collection('user-data')
+          .doc(userId)
+          .get();
+      final imageUrl = data.data()!['image-url'];
+      return imageUrl;
+    }
+
     return Scaffold(
         appBar: AppBar(
+          leading: FutureBuilder(
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              return Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(snapshot.data!),
+                ),
+              );
+            },
+            future: getUrl(),
+          ),
           title: const Text('ChatApp'),
           actions: [
             IconButton(

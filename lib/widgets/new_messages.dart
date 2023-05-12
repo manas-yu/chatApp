@@ -22,8 +22,10 @@ class _NewMessagesState extends State<NewMessages> {
     if (message.trim().isEmpty) {
       return;
     }
+
     FocusScope.of(context).unfocus();
     _messageController.clear();
+
     final user = FirebaseAuth.instance.currentUser!;
     final userData = await FirebaseFirestore.instance
         .collection('user-data')
@@ -46,6 +48,8 @@ class _NewMessagesState extends State<NewMessages> {
         children: [
           Expanded(
             child: TextField(
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
               controller: _messageController,
               decoration: const InputDecoration(
                 label: Text('Send message...'),
