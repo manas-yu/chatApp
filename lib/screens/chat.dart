@@ -1,3 +1,4 @@
+import 'package:chat/screens/profile.dart';
 import 'package:chat/widgets/chat_messages.dart';
 import 'package:chat/widgets/new_messages.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,6 +15,8 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final userId = FirebaseAuth.instance.currentUser!.uid;
+
   void setupPushNotification() async {
     final fcm = FirebaseMessaging.instance;
     await fcm.requestPermission();
@@ -31,7 +34,6 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     Future<String> getUrl() async {
-      final userId = FirebaseAuth.instance.currentUser!.uid;
       final data = await FirebaseFirestore.instance
           .collection('user-data')
           .doc(userId)
@@ -49,8 +51,16 @@ class _ChatScreenState extends State<ChatScreen> {
               }
               return Padding(
                 padding: const EdgeInsets.all(5.0),
-                child: CircleAvatar(
-                  backgroundImage: NetworkImage(snapshot.data!),
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  )),
+                  child: Hero(
+                    tag: userId,
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(snapshot.data!),
+                    ),
+                  ),
                 ),
               );
             },
@@ -59,13 +69,14 @@ class _ChatScreenState extends State<ChatScreen> {
           title: const Text('ChatApp'),
           actions: [
             IconButton(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                },
-                icon: Icon(
-                  Icons.exit_to_app,
-                  color: Theme.of(context).colorScheme.primary,
-                ))
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+              },
+              icon: Icon(
+                Icons.exit_to_app,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            )
           ],
         ),
         body: const Column(

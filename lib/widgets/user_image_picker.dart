@@ -13,9 +13,9 @@ class UserImagePicker extends StatefulWidget {
 
 class _UserImagePickerState extends State<UserImagePicker> {
   File? pickedImageFile;
-  void _pickImage() async {
+  void _pickImage(ImageSource src) async {
     final image = await ImagePicker()
-        .pickImage(source: ImageSource.camera, imageQuality: 50, maxWidth: 150);
+        .pickImage(source: src, imageQuality: 50, maxWidth: 150);
     if (image == null) {
       return;
     }
@@ -35,13 +35,31 @@ class _UserImagePickerState extends State<UserImagePicker> {
           foregroundImage:
               pickedImageFile != null ? FileImage(pickedImageFile!) : null,
         ),
-        TextButton.icon(
-            onPressed: _pickImage,
-            icon: const Icon(Icons.image),
-            label: Text(
-              'Pick Image',
-              style: TextStyle(color: Theme.of(context).colorScheme.primary),
-            ))
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton.icon(
+                onPressed: () {
+                  _pickImage(ImageSource.camera);
+                },
+                icon: const Icon(Icons.camera),
+                label: Text(
+                  'Click Image',
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.primary),
+                )),
+            TextButton.icon(
+                onPressed: () {
+                  _pickImage(ImageSource.gallery);
+                },
+                icon: const Icon(Icons.image),
+                label: Text(
+                  'Pick Image',
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.primary),
+                )),
+          ],
+        )
       ],
     );
   }
