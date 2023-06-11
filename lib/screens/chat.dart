@@ -8,7 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  const ChatScreen({super.key, required this.toggle});
+  final void Function() toggle;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -68,6 +69,10 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           title: const Text('ChatApp'),
           actions: [
+            IconButton(
+              onPressed: widget.toggle,
+              icon: const Icon(Icons.dark_mode),
+            ),
             IconButton(
               onPressed: () {
                 FirebaseAuth.instance.signOut();

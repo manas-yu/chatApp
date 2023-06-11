@@ -29,8 +29,15 @@ void main() async {
   runApp(const App());
 }
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   const App({super.key});
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  var isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +52,7 @@ class App extends StatelessWidget {
         useMaterial3: true,
         colorScheme: kDarkColorscheme,
       ),
-
-      // themeMode: ThemeMode.system,
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -54,7 +60,11 @@ class App extends StatelessWidget {
             return const SplashScreen();
           }
           if (snapshot.hasData) {
-            return const ChatScreen();
+            return ChatScreen(toggle: () {
+              setState(() {
+                isDarkMode = !isDarkMode;
+              });
+            });
           }
           return const AuthScreen();
         },
