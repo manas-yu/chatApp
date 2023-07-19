@@ -83,6 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
                   TextField(
+                    keyboardType: TextInputType.number,
                     controller: phoneField,
                     decoration: const InputDecoration(
                         labelText: 'Phone', icon: Icon(Icons.call)),
